@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHL Assessment Recommender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00e5ff;
+            --secondary: #7000ff;
+            --bg: #050510;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-dim: #a0a0c0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 229, 255, 0.15) 0%, transparent 40%);
+        }
+
+        header {
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding-bottom: 5rem;
+        }
+
+        .input-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.1rem;
+            resize: vertical;
+            min-height: 150px;
+            margin-bottom: 1.5rem;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(112, 0, 255, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(112, 0, 255, 0.4);
+            letter-spacing: 2px;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .loader {
+            display: none;
+            margin: 2rem auto;
+            border: 4px solid var(--glass);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.4s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-info h3 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .result-info a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .result-info a:hover {
+            color: var(--text);
+            text-decoration: underline;
+        }
+
+        .score-badge {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        .error-msg {
+            color: #ff4757;
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding: 2rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* Hover effect on cards */
+        .result-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>SHL Assessment Recommender</h1>
+        <p style="color: var(--text-dim)">AI-Powered Talent Matching Engine</p>
+    </header>
+
+    <div class="container">
+        <div class="input-card">
+            <textarea id="query"
+                placeholder="Enter Job Description or Hiring Query (e.g., 'Looking for senior Java engineers with cloud experience...')"></textarea>
+            <button onclick="getRecommendations()">Find Assessments</button>
+            <div id="error" class="error-msg"></div>
+            <div id="loader" class="loader"></div>
+        </div>
+
+        <div id="results-container" class="results">
+            <!-- Results will be injected here -->
+        </div>
+    </div>
+
+    <footer class="footer">
+        Powered by AI Recommendation Engine • Optimized for SHL Product Catalog
+    </footer>
+
+    <script>
+        async function getRecommendations() {
+            const query = document.getElementById('query').value;
+            const container = document.getElementById('results-container');
+            const loader = document.getElementById('loader');
+            const errorDiv = document.getElementById('error');
+
+            if (!query.trim()) {
+                errorDiv.innerText = "Please enter some text to get recommendations.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            container.innerHTML = '';
+            loader.style.display = 'block';
+
+            try {
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch recommendations');
+
+                const responseData = await response.json();
+                const assessments = responseData.recommended_assessments || [];
+                loader.style.display = 'none';
+
+                if (assessments.length === 0) {
+                    container.innerHTML = '<p style="text-align:center">No relevant assessments found.</p>';
+                    return;
+                }
+
+                assessments.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-item';
+                    card.style.animationDelay = `${index * 0.1}s`;
+
+                    card.innerHTML = `
+                        <div class="result-info">
+                            <h3>${item.name}</h3>
+                            <div style="font-size:0.8rem; color:var(--primary); margin-bottom:0.5rem;">
+                                ${item.test_type.join(' | ')} • ${item.duration} mins
+                            </div>
+                            <a href="${item.url}" target="_blank">${item.url}</a>
+                        </div>
+                        <div class="score-badge">Remote: ${item.remote_support}</div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                loader.style.display = 'none';
+                errorDiv.innerText = "Error: " + err.message + ". Make sure the API server is running.";
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+
+</html>
