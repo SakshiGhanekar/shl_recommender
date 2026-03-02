@@ -8,3 +8,4 @@ rank_bm25
 scikit-learn
 numpy<2.0.0
 streamlit
+altair
