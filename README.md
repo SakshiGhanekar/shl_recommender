@@ -14,7 +14,7 @@ An intelligent recommendation system that simplifies the process of finding the 
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/SakshiGhanekar/shl_recommender.git
    cd shl-recommender
    ```
 
